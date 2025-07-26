@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dobby's Daily Reminder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Metamorphous&family=Henny+Penny&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    :root {
+      --dark-purple: #1a0033;
+      --neon-blue: #00f7ff;
+      --blood-red: #ff0033;
+      --wax-color: #d4a76a;
+      --golden-snitch: #FFD700;
+      --haunted-green: #00ff9d;
+    }
+    
+    body {
+      font-family: 'Metamorphous', cursive;
+      background: url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=3000') no-repeat center center fixed;
+      background-size: cover;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      position: relative;
+      min-height: 100vh;
+      transition: all 0.5s;
+    }
+    
+    body.haunted {
+      background: url('https://images.unsplash.com/photo-1506815444479-bfdb1e96c566?q=80&w=3000') no-repeat center center fixed;
+      background-size: cover;
+      filter: brightness(0.7) contrast(1.2);
+    }
+    
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 2rem;
+      background-color: rgba(10, 0, 20, 0.8);
+      border-radius: 10px;
+      box-shadow: 0 0 30px var(--neon-blue);
+      position: relative;
+      z-index: 10;
+      border: 1px solid var(--neon-blue);
+      margin-top: 2rem;
+      backdrop-filter: blur(5px);
+      transform-style: preserve-3d;
+      perspective: 1000px;
+    }
+    
+    h1 {
+      font-family: 'Henny Penny', cursive;
+      color: var(--neon-blue);
+      text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue);
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-size: 2.5rem;
+      letter-spacing: 2px;
+      transform: translateZ(20px);
+    }
+    
+    body.haunted h1 {
+      color: var(--haunted-green);
+      text-shadow: 0 0 10px var(--haunted-green), 0 0 20px var(--haunted-green);
+    }
+    
+    .streak {
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 0.5rem;
+      border-radius: 5px;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--blood-red);
+      box-shadow: 0 0 10px var(--blood-red);
+      transform: translateZ(10px);
+    }
+    
+    .input-group {
+      display: flex;
+      margin-bottom: 1.5rem;
+      transform: translateZ(15px);
+    }
+    
+    #taskInput {
+      flex: 1;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 5px 0 0 5px;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: white;
+      font-family: 'Metamorphous', cursive;
+      border: 1px solid var(--neon-blue);
+    }
+    
+    body.haunted #taskInput {
+      border: 1px solid var(--haunted-green);
+    }
+    
+    #addTask {
+      padding: 0.8rem 1rem;
+      background-color: var(--dark-purple);
+      color: var(--neon-blue);
+      border: none;
+      border-radius: 0 5px 5px 0;
+      cursor: pointer;
+      font-family: 'Henny Penny', cursive;
+      font-size: 1rem;
+      transition: all 0.3s;
+      border: 1px solid var(--neon-blue);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    body.haunted #addTask {
+      color: var(--haunted-green);
+      border: 1px solid var(--haunted-green);
+    }
+    
+    #addTask:hover {
+      background-color: var(--blood-red);
+      color: white;
+      text-shadow: 0 0 5px white;
+      box-shadow: 0 0 15px var(--blood-red);
+    }
+    
+    #addTask:active {
+      transform: scale(0.95);
+    }
+    
+    #addTask::after {
+      content: '🧹';
+      position: absolute;
+      right: -20px;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0;
+      transition: all 0.3s;
+      font-size: 1.5rem;
+      text-shadow: 0 0 10px var(--golden-snitch);
+    }
+    
+    #addTask:hover::after {
+      right: 10px;
+      opacity: 1;
+    }
+    
+    #quote {
+      font-style: italic;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      padding: 0.8rem;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 5px;
+      border-left: 3px solid var(--blood-red);
+      transform: translateZ(5px);
+    }
+    
+    #taskList {
+      list-style-type: none;
+      padding: 0;
+      transform: translateZ(10px);
+    }
+    
+    #taskList li {
+      background-color: rgba(0, 0, 0, 0.5);
+      padding: 0.8rem;
+      margin-bottom: 0.5rem;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 3px solid var(--neon-blue);
+      transition: all 0.3s;
+      position: relative;
+    }
+    
+    body.haunted #taskList li {
+      border-left: 3px solid var(--haunted-green);
+    }
+    
+    #taskList li:hover {
+      background-color: rgba(30, 0, 60, 0.7);
+      transform: translateX(5px) translateZ(5px);
+    }
+    
+    #taskList li.completed {
+      text-decoration: line-through;
+      opacity: 0.7;
+      border-left-color: var(--blood-red);
+    }
+    
+    .task-icon {
+      margin-right: 10px;
+      font-size: 1.2rem;
+    }
+    
+    .delete-btn {
+      background-color: transparent;
+      border: none;
+      color: var(--blood-red);
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: all 0.3s;
+    }
+    
+    .delete-btn:hover {
+      transform: scale(1.2);
+    }
+    
+    .modal, .popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      transform-style: preserve-3d;
+      perspective: 1000px;
+    }
+    
+    .modal-content, .popup-content {
+      background-color: var(--dark-purple);
+      padding: 2rem;
+      border-radius: 10px;
+      max-width: 400px;
+      text-align: center;
+      border: 2px solid var(--blood-red);
+      box-shadow: 0 0 20px var(--blood-red);
+      position: relative;
+      transform: translateZ(50px);
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    .modal-content button, .popup-content button {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background-color: var(--blood-red);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: 'Metamorphous', cursive;
+      transition: all 0.3s;
+    }
+    
+    .modal-content button:hover, .popup-content button:hover {
+      transform: scale(1.1);
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    /* Enhanced 3D Candles with Realistic Wax Drips */
+.candles-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 10;
+  perspective: 800px;
+}
+
+.candle {
+  position: absolute;
+  width: 30px;
+  height: 80px;
+  background: linear-gradient(to right, #4a3a28, #6b5a48, #4a3a28);
+  border-radius: 3px;
+  box-shadow: 
+    inset -5px 0 10px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(0, 0, 0, 0.5);
+  animation: float 6s infinite ease-in-out;
+  transform-style: preserve-3d;
+  transform: rotateY(20deg);
+}
+
+.candle::before {
+  content: '';
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 15px;
+  height: 30px;
+  background: linear-gradient(to bottom, #4a3a28, #6b5a48);
+  border-radius: 50% 50% 20% 20%;
+}
+
+.candle::after {
+  content: '';
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 15px;
+  background: var(--neon-blue);
+  border-radius: 50% 50% 20% 20%;
+  box-shadow: 
+    0 0 10px var(--neon-blue),
+    0 0 20px var(--neon-blue),
+    0 0 40px var(--neon-blue);
+  animation: flicker 2s infinite alternate;
+}
+
+body.haunted .candle::after {
+  background: var(--haunted-green);
+  box-shadow: 
+    0 0 10px var(--haunted-green),
+    0 0 20px var(--haunted-green),
+    0 0 40px var(--haunted-green);
+}
+
+.wax-drip {
+  position: absolute;
+  width: 3px;
+  background: linear-gradient(to bottom, var(--wax-color), rgba(212, 167, 106, 0.5));
+  animation: drip 8s infinite;
+  transform-origin: top;
+}
+
+@keyframes drip {
+  0%, 20% {
+    height: 0;
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  80% {
+    height: 30px;
+    opacity: 1;
+  }
+  100% {
+    height: 40px;
+    opacity: 0;
+  }
+}
+
+    /* Enhanced Bat Animation */
+    .bat {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23000" d="M510.28 285.99c-15.79-32.58-31.5-44.07-47.21-45.66-15.71-1.59-31.42 6.64-47.13 24.97-4.42 5.14-10.61 12.52-18.56 22.13-7.95 9.61-15.9 18.42-23.85 26.43-7.95 8.01-15.9 14.4-23.85 19.17-7.95 4.77-15.9 7.09-23.85 6.96-7.95-.13-15.9-2.92-23.85-8.36-7.95-5.44-15.9-13.62-23.85-24.53-7.95-10.91-15.9-23.64-23.85-38.19-7.95-14.55-15.9-29.99-23.85-46.32-7.95-16.33-15.9-31.73-23.85-46.19-7.95-14.46-15.9-26.06-23.85-34.79-7.95-8.73-15.9-13.66-23.85-14.79-7.95-1.13-15.9 1.57-23.85 8.1-7.95 6.53-15.9 16.95-23.85 31.26-7.95 14.31-15.9 31.59-23.85 51.84-7.95 20.25-15.9 41.55-23.85 63.9-7.95 22.35-15.9 43.83-23.85 64.44-7.95 20.61-15.9 38.43-23.85 53.46-7.95 15.03-15.9 25.35-23.85 30.96-7.95 5.61-15.9 5.59-23.85-.06-7.95-5.65-15.9-16.57-23.85-32.76-7.95-16.19-15.9-36.72-23.85-61.59-7.95-24.87-15.9-52.16-23.85-81.87-7.95-29.71-15.9-59.92-23.85-90.63-7.95-30.71-15.9-59.99-23.85-87.84-7.95-27.85-15.9-52.34-23.85-73.47-7.95-21.13-15.9-36.98-23.85-47.53-7.95-10.55-15.9-13.87-23.85-9.96-7.95 3.91-15.9 15.6-23.85 35.07-7.95 19.47-15.9 46.8-23.85 81.99-7.95 35.19-15.9 77.31-23.85 126.36-7.95 49.05-15.9 103.1-23.85 162.15-7.95 59.05-15.9 120.17-23.85 183.36-7.95 63.19-15.9 125.51-23.85 186.96-7.95 61.45-15.9 118.1-23.85 169.94-7.95 51.84-15.9 95.93-23.85 132.27-7.95 36.34-15.9 61.99-23.85 76.96-7.95 14.97-15.9 17.32-23.85 7.04-7.95-10.28-15.9-33.02-23.85-68.21-7.95-35.19-15.9-81.91-23.85-140.16-7.95-58.25-15.9-126.1-23.85-203.54-7.95-77.44-15.9-162.53-23.85-255.28-7.95-92.75-15.9-190.22-23.85-292.41-7.95-102.19-15.9-206.16-23.85-311.91-7.95-105.75-15.9-210.34-23.85-313.77-7.95-103.43-15.9-201.76-23.85-295-7.95-93.24-15.9-177.44-23.85-252.6-7.95-75.16-15.9-137.34-23.85-186.54-7.95-49.2-15.9-81.48-23.85-96.84-7.95-15.36-15.9-11.86-23.85 10.5-7.95 22.36-15.9 65.3-23.85 128.82-7.95 63.52-15.9 146.69-23.85 249.51-7.95 102.82-15.9 224.36-23.85 364.61-7.95 140.25-15.9 298.28-23.85 474.08-7.95 175.8-15.9 368.44-23.85 577.91-7.95 209.47-15.9 434.84-23.85 676.11-7.95 241.27-15.9 497.5-23.85 768.69-7.95 271.19-15.9 556.4-23.85 855.63-7.95 299.23-15.9 611.54-23.85 936.93-7.95 325.39-15.9 662.92-23.85 1012.59-7.95 349.67-15.9 710.55-23.85 1083.63-7.95 373.08-15.9 757.43-23.85 1153.05-7.95 395.62-15.9 801.57-23.85 1217.85-7.95 416.28-15.9 841.96-23.85 1276.95-7.95 434.99-15.9 878.36-23.85 1330.11-7.95 451.75-15.9 910.94-23.85 1376.57-7.95 465.63-15.9 936.76-23.85 1411.33-7.95 474.57-15.9 950.64-23.85 1428.21-7.95 477.57-15.9 956.6-23.85 1437.09-7.95 480.49-15.9 962.4-23.85 1445.73-7.95 483.33-15.9 967.98-23.85 1454.07-7.95 486.09-15.9 973.5-23.85 1461.93-7.95 488.43-15.9 977.18-23.85 1468.35-7.95 491.17-15.9 983.66-23.85 1474.17-7.95 490.51-15.9 980.34-23.85 1468.57-7.95 488.23-15.9 975.78-23.85 1461.39-7.95 485.61-15.9 970.54-23.85 1452.63-7.95 482.09-15.9 963.5-23.85 1442.19-7.95 478.69-15.9 955.7-23.85 1430.07-7.95 474.37-15.9 946.06-23.85 1416.27-7.95 470.21-15.9 935.58-23.85 1400.79-7.95 465.21-15.9 923.26-23.85 1383.63-7.95 460.37-15.9 910.1-23.85 1365.79-7.95 455.69-15.9 896.1-23.85 1347.27-7.95 451.17-15.9 881.26-23.85 1328.07-7.95 446.81-15.9 865.58-23.85 1308.19-7.95 442.61-15.9 849.06-23.85 1287.63-7.95 438.57-15.9 831.7-23.85 1266.39-7.95 434.69-15.9 813.5-23.85 1244.47-7.95 430.97-15.9 794.46-23.85 1221.87-7.95 427.41-15.9 774.58-23.85 1198.59-7.95 424.01-15.9 753.86-23.85 1174.63-7.95 420.77-15.9 732.3-23.85 1150-7.95 417.7-15.9 709.9-23.85 1124.67-7.95 414.79-15.9 686.66-23.85 1098.99-7.95 412.33-15.9 662.58-23.85 1072.63-7.95 410.05-15.9 637.66-23.85 1045.59-7.95 407.93-15.9 611.9-23.85 1017.87-7.95 405.97-15.9 585.3-23.85 989.47-7.95 404.17-15.9 557.86-23.85 960.39-7.95 402.53-15.9 529.58-23.85 930.63-7.95 401.05-15.9 500.46-23.85 900.19-7.95 399.73-15.9 470.5-23.85 869.07-7.95 398.57-15.9 439.7-23.85 837.27-7.95 397.57-15.9 408.06-23.85 804.79-7.95 396.73-15.9 375.58-23.85 771.63-7.95 396.05-15.9 342.26-23.85 737.79-7.95 395.53-15.9 308.1-23.85 703.27-7.95 395.17-15.9 273.1-23.85 668.07-7.95 394.97-15.9 237.26-23.85 632.19-7.95 394.93-15.9 200.58-23.85 595.63-7.95 395.05-15.9 163.06-23.85 558.39-7.95 395.33-15.9 124.7-23.85 520.47-7.95 395.77-15.9 85.5-23.85 481.87-7.95 396.37-15.9 45.46-23.85 442.59-7.95 397.13-15.9 4.58-23.85 402.63-7.95 398.05"/></svg>');
+      background-size: contain;
+      background-repeat: no-repeat;
+      animation: fly 15s linear infinite;
+      opacity: 0.8;
+      filter: drop-shadow(0 0 5px var(--neon-blue));
+      transform-style: preserve-3d;
+      z-index: 5;
+    }
+    
+    body.haunted .bat {
+      filter: drop-shadow(0 0 5px var(--haunted-green));
+    }
+    
+    /* Witch Hat Toggle - Enhanced */
+#witchToggle {
+  position: fixed;
+  top: 30px;
+  right: 30px;
+  z-index: 200;
+  cursor: pointer;
+  background: radial-gradient(circle at 60% 40%, #222 70%, #444 100%);
+  border-radius: 50%;
+  width: 90px;
+  height: 90px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s;
+  border: 3px solid var(--neon-blue);
+  box-shadow: 0 0 30px 10px var(--neon-blue), 0 0 60px 10px #000 inset;
+  transform-style: preserve-3d;
+  overflow: visible;
+}
+
+body.haunted #witchToggle {
+  border: 3px solid var(--haunted-green);
+  box-shadow: 0 0 30px 10px var(--haunted-green), 0 0 60px 10px #000 inset;
+}
+
+#witchToggle:hover {
+  transform: scale(1.15) rotateY(20deg);
+  box-shadow: 0 0 40px 20px var(--neon-blue), 0 0 80px 20px #000 inset;
+}
+
+body.haunted #witchToggle:hover {
+  box-shadow: 0 0 40px 20px var(--haunted-green), 0 0 80px 20px #000 inset;
+}
+
+#hat {
+  width: 70px;
+  height: 70px;
+  filter: drop-shadow(0 0 15px var(--neon-blue)) drop-shadow(0 0 10px #fff);
+  transition: all 0.3s;
+  z-index: 201;
+}
+
+body.haunted #hat {
+  filter: drop-shadow(0 0 15px var(--haunted-green)) drop-shadow(0 0 10px #fff);
+}
+
+#witchToggle:hover #hat {
+  transform: rotate(-25deg) scale(1.1);
+}
+
+/* Witch flying with broomstick animation */
+.witch-fly {
+  position: fixed;
+  left: -120px;
+  top: 120px;
+  width: 120px;
+  height: 80px;
+  z-index: 150;
+  pointer-events: none;
+  animation: witch-fly-anim 8s linear infinite;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23fff" d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256 256-114.6 256-256S397.4 0 256 0zm0 464c-114.7 0-208-93.3-208-208S141.3 48 256 48s208 93.3 208 208-93.3 208-208 208zm96-288h-64v64h64v64h-64v64h-64v-64h-64v-64h64v-64h64v64z"/></svg>');
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0;
+}
+
+body.haunted .witch-fly {
+  background-image: url('https://www.svgrepo.com/show/483877/witch-illustration-1.svg');
+}
+
+@keyframes witch-fly-anim {
+  0% {
+    left: -120px;
+    top: 120px;
+    opacity: 0;
+    transform: scale(0.8) rotate(-10deg);
+  }
+  10% {
+    opacity: 1;
+  }
+  50% {
+    top: 80px;
+    opacity: 1;
+    transform: scale(1) rotate(5deg);
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    left: 110vw;
+    top: 160px;
+    opacity: 0;
+    transform: scale(0.8) rotate(-10deg);
+  }
+}
+
+    /* Enhanced Lumos Music Note */
+    .lumos-note {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      font-size: 2rem;
+      cursor: pointer;
+      color: var(--golden-snitch);
+      text-shadow: 0 0 10px var(--golden-snitch);
+      z-index: 100;
+      transition: all 0.3s;
+      transform-style: preserve-3d;
+      background: rgba(0, 0, 0, 0.7);
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 2px solid var(--golden-snitch);
+      box-shadow: 0 0 20px var(--golden-snitch);
+    }
+    
+    body.haunted .lumos-note {
+      color: var(--haunted-green);
+      text-shadow: 0 0 10px var(--haunted-green);
+      border: 2px solid var(--haunted-green);
+      box-shadow: 0 0 20px var(--haunted-green);
+    }
+    
+    .lumos-note:hover {
+      transform: scale(1.2) rotate(15deg);
+      text-shadow: 0 0 20px var(--golden-snitch);
+    }
+    
+    body.haunted .lumos-note:hover {
+      text-shadow: 0 0 20px var(--haunted-green);
+    }
+    
+    /* Music Notes Animation */
+    .music-note {
+      position: absolute;
+      font-size: 1.5rem;
+      color: var(--golden-snitch);
+      animation: float-note 3s linear forwards;
+      opacity: 0;
+      z-index: 1;
+    }
+    
+    body.haunted .music-note {
+      color: var(--haunted-green);
+    }
+    
+    @keyframes float-note {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100px) rotate(360deg);
+        opacity: 0;
+      }
+    }
+    
+    /* Harry Potter Elements */
+    .hp-element {
+      position: absolute;
+      z-index: 2;
+      pointer-events: none;
+    }
+    
+    .snitch {
+      width: 30px;
+      height: 30px;
+      background: radial-gradient(circle at center, var(--golden-snitch) 0%, #FFA500 100%);
+      border-radius: 50%;
+      box-shadow: 0 0 15px var(--golden-snitch);
+      animation: float 8s infinite ease-in-out;
+    }
+    
+    .snitch::before, .snitch::after {
+      content: '';
+      position: absolute;
+      width: 40px;
+      height: 5px;
+      background-color: var(--golden-snitch);
+      top: 50%;
+      transform: translateY(-50%);
+      box-shadow: 0 0 5px var(--golden-snitch);
+    }
+    
+    .snitch::before {
+      left: -45px;
+    }
+    
+    .snitch::after {
+      right: -45px;
+    }
+    
+    /* Animations */
+    @keyframes flicker {
+      0%, 100% {
+        opacity: 1;
+        height: 15px;
+      }
+      25% {
+        opacity: 0.8;
+        height: 12px;
+      }
+      50% {
+        opacity: 1;
+        height: 18px;
+      }
+      75% {
+        opacity: 0.7;
+        height: 10px;
+      }
+    }
+    
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-20px);
+      }
+    }
+    
+    @keyframes fly {
+      0% {
+        transform: translate(-100px, 100px) scale(0.5);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.8;
+      }
+      90% {
+        opacity: 0.8;
+      }
+      100% {
+        transform: translate(calc(100vw + 100px), -100px) scale(0.5);
+        opacity: 0;
+      }
+    }
+    
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.1);
+      }
+    }
+    
+    /* 3D Effects */
+    .three-d {
+      transform-style: preserve-3d;
+    }
+    
+    /* Sound Wave Animation */
+    .sound-wave {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: -1;
+      opacity: 0.1;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .container {
+        margin: 1rem;
+        padding: 1rem;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      #witchToggle {
+        width: 50px;
+        height: 50px;
+      }
+      
+      #hat {
+        width: 30px;
+        height: 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Candles with Wax Drips -->
+  <div class="candles-container">
+    <div class="candle" style="top: 10%; left: 10%;">
+      <div class="wax-drip" style="left: 5px; animation-delay: 0s;"></div>
+    </div>
+    <div class="candle" style="top: 20%; left: 80%;">
+      <div class="wax-drip" style="left: 12px; animation-delay: 2s;"></div>
+    </div>
+    <div class="candle" style="top: 70%; left: 15%;">
+      <div class="wax-drip" style="left: 8px; animation-delay: 4s;"></div>
+    </div>
+    <div class="candle" style="top: 60%; left: 85%;">
+      <div class="wax-drip" style="left: 10px; animation-delay: 6s;"></div>
+    </div>
+    <div class="candle" style="top: 30%; left: 50%;">
+      <div class="wax-drip" style="left: 8px; animation-delay: 1s;"></div>
+    </div>
+  </div>
+
+  <!-- Flying Bats -->
+  <div class="bat" style="top: 20%; animation-delay: 0s; animation-duration: 18s; transform: scale(1.5) rotate(10deg);"></div>
+  <div class="bat" style="top: 50%; animation-delay: 5s; animation-duration: 22s; transform: scale(0.8) rotate(-15deg);"></div>
+  <div class="bat" style="top: 70%; animation-delay: 10s; animation-duration: 15s; transform: scale(1.2) rotate(5deg);"></div>
+  <div class="bat" style="top: 40%; left: 70%; animation-delay: 7s; animation-duration: 25s; transform: scale(1) rotate(-5deg);"></div>
+
+  <!-- Harry Potter Elements -->
+  <div class="hp-element snitch" style="top: 30%; left: 5%;"></div>
+  <div class="hp-element" style="top: 80%; left: 90%; font-size: 2rem;">⚡</div>
+
+  <!-- Witch Hat Toggle Button -->
+  <div id="witchToggle">
+    <img src="https://cdn-icons-png.flaticon.com/128/15625/15625832.png" alt="Witch Hat" id="hat" />
+  </div>
+
+  <!-- Witch Flying Animation -->
+  <div class="witch-fly"></div>
+
+  <!-- Lumos Music Note -->
+  <div class="lumos-note" id="lumosNote">🎵</div>
+
+  <!-- App Container -->
+  <div class="container three-d">
+    <h1>🧦 Dobby's Daily Reminder 🦇</h1>
+
+    <!-- Streak Display -->
+    <div class="streak">
+      <span>Streak: 🧦 <span id="sockCount">0</span> Days</span>
+    </div>
+
+    <!-- Task Input Area -->
+    <div class="input-group">
+  <input type="text" id="taskInput" placeholder="'Dobby is free when tasks are done!'" />
+  <button id="addTask">
+    <i class="fas fa-magic-wand-sparkles"></i> Add Spell
+  </button>
+</div>
+
+<!-- 🔊 Hidden audio element -->
+<audio id="spellSound" src="./HARRY POTTER MUSIC (mp3cut.net).mp3" preload="auto"></audio>
+
+
+    <!-- Motivational Quote -->
+    <div id="quote">
+      ✨ "It is our choices that show what we truly are, far more than our abilities." — Dumbledore 
+    </div>
+
+    <!-- Task List -->
+    <ul id="taskList">
+      <!-- Tasks will appear here -->
+    </ul>
+
+    <!-- Reminder Popup -->
+    <div id="reminderModal" class="modal hidden">
+      <div class="modal-content">
+        <p>⚠ Dobby says: You haven't finished your tasks! Complete them or no socks for you!</p>
+        <button onclick="closeModal()">Okay, Dobby!</button>
+      </div>
+    </div>
+
+    <!-- Success Popup -->
+    <div id="successPopup" class="popup hidden">
+      <div class="popup-content">
+        <p>🎉 You did it! Dobby is proud and has received a sock! 🏆</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Audio Elements -->
+  <audio id="backgroundMusic" loop>
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+  </audio>
+  
+  <audio id="broomSound">
+    <source src="https://www.soundjay.com/mechanical/sounds/broom-sweep-01.mp3" type="audio/mpeg">
+  </audio>
+  
+  <audio id="batSound">
+    <source src="https://www.soundjay.com/nature/sounds/bat-01.mp3" type="audio/mpeg">
+  </audio>
+  
+  <audio id="magicSound">
+    <source src="https://www.soundjay.com/magic/sounds/magic-spell-01.mp3" type="audio/mpeg">
+  </audio>
+  
+  <audio id="lumosSound">
+    <source src="https://www.soundjay.com/magic/sounds/magic-chime-01.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    // Task Management
+    document.addEventListener('DOMContentLoaded', function() {
+      const taskInput = document.getElementById('taskInput');
+      const addTaskBtn = document.getElementById('addTask');
+      const taskList = document.getElementById('taskList');
+      const sockCount = document.getElementById('sockCount');
+      const reminderModal = document.getElementById('reminderModal');
+      const successPopup = document.getElementById('successPopup');
+      const witchToggle = document.getElementById('witchToggle');
+      const lumosNote = document.getElementById('lumosNote');
+      const quoteElement = document.getElementById('quote');
+      const witchFly = document.querySelector('.witch-fly');
+      
+      // Audio elements
+      const backgroundMusic = document.getElementById('backgroundMusic');
+      const broomSound = document.getElementById('broomSound');
+      const batSound = document.getElementById('batSound');
+      const magicSound = document.getElementById('magicSound');
+      const lumosSound = document.getElementById('lumosSound');
+      
+      // Harry Potter icons for tasks
+      const hpIcons = ['🧙', '⚡', '🦉', '📜', '🔮', '🏰', '🧪', '🐍', '🦁', '🦡', '🦅', '💀', '👻'];
+      
+      // Haunted quotes
+      const hauntedQuotes = [
+        '"Dark times lie ahead of us and there will be a time when we must choose between what is easy and what is right." — Dumbledore',
+        '"Happiness can be found even in the darkest of times, if one only remembers to turn on the light." — Dumbledore',
+        '"Numbing the pain for a while will make it worse when you finally feel it." — Dumbledore',
+        '"Do not pity the dead, Harry. Pity the living, and above all, those who live without love." — Dumbledore',
+        '"It does not do to dwell on dreams and forget to live." — Dumbledore',
+        '"Fear of a name increases fear of the thing itself." — Dumbledore',
+        '"The truth. It is a beautiful and terrible thing, and should therefore be treated with great caution." — Dumbledore',
+        '"It takes a great deal of bravery to stand up to our enemies, but just as much to stand up to our friends." — Dumbledore'
+      ];
+      
+      let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+      let streak = parseInt(localStorage.getItem('streak')) || 0;
+      let isHaunted = false;
+      let musicInterval;
+      
+      // Load tasks and streak
+      updateStreakDisplay();
+      renderTasks();
+      
+      // Add new task
+      
+      addTaskBtn.addEventListener('click', addTask);
+      taskInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') addTask();
+      });
+      
+      function addTask() {
+        const taskText = taskInput.value.trim();
+        if (taskText) {
+          const randomIcon = hpIcons[Math.floor(Math.random() * hpIcons.length)];
+          tasks.push({ text: taskText, completed: false, icon: randomIcon });
+          saveTasks();
+          renderTasks();
+          taskInput.value = '';
+          playSound(magicSound);
+          
+          // Trigger witch flying animation
+          triggerWitchFly();
+          
+          // Add broom animation effect
+          addTaskBtn.classList.add('broom-sweep');
+          setTimeout(() => {
+            addTaskBtn.classList.remove('broom-sweep');
+          }, 1000);
+        }
+      }
+      
+      // Trigger witch flying animation
+      function triggerWitchFly() {
+        witchFly.style.top = (Math.random() * 50 + 10) + '%';
+        witchFly.style.animation = 'none';
+        witchFly.offsetHeight; // Trigger reflow
+        witchFly.style.animation = 'witch-fly-anim 8s linear';
+      }
+      
+      // Render tasks to the DOM
+      function renderTasks() {
+        taskList.innerHTML = '';
+        if (tasks.length === 0) {
+          taskList.innerHTML = '<li style="justify-content: center;">No tasks yet! Dobby is waiting...</li>';
+          return;
+        }
+        
+        tasks.forEach((task, index) => {
+          const li = document.createElement('li');
+          li.innerHTML = `
+            <div>
+              <span class="task-icon">${task.icon}</span>
+              <span>${task.text}</span>
+            </div>
+            <button class="delete-btn" data-index="${index}">🗡</button>
+          `;
+          
+          if (task.completed) {
+            li.classList.add('completed');
+          }
+          
+          li.addEventListener('click', () => toggleTask(index));
+          taskList.appendChild(li);
+        });
+      }
+      
+      // Toggle task completion
+      function toggleTask(index) {
+        tasks[index].completed = !tasks[index].completed;
+        saveTasks();
+        renderTasks();
+        checkAllTasksCompleted();
+      }
+      
+      // Delete task
+      taskList.addEventListener('click', function(e) {
+        if (e.target.classList.contains('delete-btn')) {
+          e.stopPropagation();
+          const index = e.target.getAttribute('data-index');
+          tasks.splice(index, 1);
+          saveTasks();
+          renderTasks();
+          playSound(batSound);
+        }
+      });
+      
+      // Save tasks to localStorage
+      function saveTasks() {
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+      }
+      
+      // Update streak display
+      function updateStreakDisplay() {
+        sockCount.textContent = streak;
+      }
+      
+      // Check if all tasks are completed
+      function checkAllTasksCompleted() {
+        if (tasks.length === 0) return;
+        
+        const allCompleted = tasks.every(task => task.completed);
+        if (allCompleted) {
+          // Increase streak
+          streak++;
+          localStorage.setItem('streak', streak.toString());
+          updateStreakDisplay();
+          
+          // Show success popup
+          showSuccessPopup();
+          
+          // Change quote
+          changeQuote();
+          
+          // Reset tasks
+          tasks = [];
+          saveTasks();
+          setTimeout(renderTasks, 2000);
+        }
+      }
+      
+      // Change motivational quote
+      function changeQuote() {
+        const randomQuote = hauntedQuotes[Math.floor(Math.random() * hauntedQuotes.length)];
+        quoteElement.textContent = `✨ ${randomQuote}`;
+      }
+      
+      // Show reminder modal
+      function showReminderModal() {
+        reminderModal.classList.remove('hidden');
+        playSound(batSound);
+      }
+      
+      // Close modal
+      function closeModal() {
+        reminderModal.classList.add('hidden');
+      }
+      
+      // Show success popup
+      function showSuccessPopup() {
+        successPopup.classList.remove('hidden');
+        playSound(lumosSound);
+        
+        // Add confetti effect
+        for (let i = 0; i < 50; i++) {
+          createConfetti();
+        }
+        
+        setTimeout(() => {
+          successPopup.classList.add('hidden');
+        }, 3000);
+      }
+      
+      // Create confetti elements
+      function createConfetti() {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.backgroundColor = isHaunted ? 
+          `hsl(${Math.random() * 60 + 120}, 100%, 50%)` : 
+          `hsl(${Math.random() * 360}, 100%, 50%)`;
+        confetti.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+        confetti.style.width = (Math.random() * 10 + 5) + 'px';
+        confetti.style.height = (Math.random() * 10 + 5) + 'px';
+        document.body.appendChild(confetti);
+
+        setTimeout(() => {
+          confetti.remove();
+        }, 3000);
+      }
+      
+      // Toggle haunted mode
+      witchToggle.addEventListener('click', function() {
+        isHaunted = !isHaunted;
+        document.body.classList.toggle('haunted', isHaunted);
+        playSound(magicSound);
+        
+        // Change hat color based on mode
+        const hat = document.getElementById('hat');
+        if (isHaunted) {
+          hat.style.filter = 'drop-shadow(0 0 15px var(--haunted-green)) drop-shadow(0 0 10px #fff)';
+        } else {
+          hat.style.filter = 'drop-shadow(0 0 15px var(--neon-blue)) drop-shadow(0 0 10px #fff)';
+        }
+      });
+      
+      // Toggle background music
+      lumosNote.addEventListener('click', function() {
+        if (backgroundMusic.paused) {
+          backgroundMusic.play();
+          lumosNote.style.textShadow = '0 0 20px ' + (isHaunted ? 'var(--haunted-green)' : 'var(--golden-snitch)');
+          playSound(lumosSound);
+          startMusicNotes();
+        } else {
+          backgroundMusic.pause();
+          lumosNote.style.textShadow = '0 0 10px ' + (isHaunted ? 'var(--haunted-green)' : 'var(--golden-snitch)');
+          stopMusicNotes();
+        }
+      });
+      
+      // Start music notes animation
+      function startMusicNotes() {
+        if (musicInterval) clearInterval(musicInterval);
+        musicInterval = setInterval(() => {
+          if (!backgroundMusic.paused) {
+            createMusicNote();
+          }
+        }, 800);
+      }
+      
+      // Stop music notes animation
+      function stopMusicNotes() {
+        if (musicInterval) clearInterval(musicInterval);
+      }
+      
+      // Create floating music note
+      function createMusicNote() {
+        const note = document.createElement('div');
+        note.className = 'music-note';
+        note.textContent = Math.random() > 0.5 ? '♪' : '♫';
+        note.style.left = (Math.random() * 80 + 10) + 'vw';
+        note.style.bottom = '100px';
+        note.style.animationDuration = (Math.random() * 2 + 2) + 's';
+        document.body.appendChild(note);
+        
+        setTimeout(() => {
+          note.remove();
+        }, 3000);
+      }
+      
+      // Play sound effects
+      function playSound(sound) {
+        sound.currentTime = 0;
+        sound.play().catch(e => console.log("Audio play failed:", e));
+      }
+      
+      // Check for unfinished tasks every hour
+      setInterval(() => {
+        if (tasks.length > 0 && !tasks.every(task => task.completed)) {
+          showReminderModal();
+        }
+      }, 3600000); // 1 hour
+      
+      // Add some random bats periodically
+      setInterval(() => {
+        if (Math.random() > 0.7) {
+          const bat = document.createElement('div');
+          bat.className = 'bat';
+          bat.style.top = Math.random() * 100 + '%';
+          bat.style.left = Math.random() * 100 + '%';
+          bat.style.animationDelay = Math.random() * 5 + 's';
+          bat.style.animationDuration = (Math.random() * 10 + 10) + 's';
+          bat.style.transform = `scale(${Math.random() + 0.5}) rotate(${Math.random() * 30 - 15}deg)`;
+          document.body.appendChild(bat);
+          
+          setTimeout(() => {
+            bat.remove();
+          }, 25000);
+        }
+      }, 10000);
+      
+      // Add floating golden snitches periodically
+      setInterval(() => {
+        if (Math.random() > 0.8) {
+          const snitch = document.createElement('div');
+          snitch.className = 'hp-element snitch';
+          snitch.style.top = Math.random() * 100 + '%';
+          snitch.style.left = Math.random() * 100 + '%';
+          document.body.appendChild(snitch);
+          
+          setTimeout(() => {
+            snitch.remove();
+          }, 30000);
+        }
+      }, 30000);
+    });
+  </script>
+  
+  <style>
+    /* Additional styles for new elements */
+    .confetti {
+      position: fixed;
+      top: -10px;
+      z-index: 999;
+      animation: fall linear forwards;
+    }
+    
+    @keyframes fall {
+      to {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+    
+    .broom-sweep {
+      animation: sweep 0.5s ease-in-out;
+    }
+    
+    @keyframes sweep {
+      0%, 100% {
+        transform: rotate(0deg);
+      }
+      25% {
+        transform: rotate(-15deg);
+      }
+      50% {
+        transform: rotate(0deg);
+      }
+      75% {
+        transform: rotate(15deg);
+      }
+    }
+  </style>
+</body>
+</html>
