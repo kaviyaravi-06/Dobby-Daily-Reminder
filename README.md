@@ -1,2 +1,7 @@
-# Dobby-Daily-Reminder
-Dobby's Daily Reminder is a Harry Potter-themed task manager that rewards completed tasks with virtual socks for Dobby. The app offers two visual themes (magical and haunted) with interactive elements like animated candles, flying bats, and dynamic quotes.
+Dobby's Daily Reminder is a magical productivity app that transforms mundane to-do lists into an enchanting Harry Potter experience. This interactive task manager rewards users with virtual socks for Dobby upon completing tasks, blending organization with wizarding world charm.
+
+The app features dual themes - a cheerful magical mode with floating candles and golden snitches, and a spooky haunted alternative with eerie green lighting and bat animations. Users can toggle between these visually distinct modes by clicking an animated witch's hat. Task management becomes immersive with spell-casting sound effects, dynamic Harry Potter quotes that refresh upon completion, and surprise witch animations that fly across the screen when adding new items.
+
+Built with HTML5, CSS3 (including 3D transforms), and vanilla JavaScript, the interface includes Three.js-enhanced floating candles with realistic wax drips. A Lumos music player provides atmospheric background music accompanied by animated floating notes. The streak counter tracks productivity through Dobby's growing sock collection, adding gamification to task completion.
+
+This project creatively reimagines productivity tools by combining functionality with fantasy elements. The responsive design works across devices, while the lightweight codebase ensures smooth performance. Whether for Harry Potter fans seeking motivation or anyone wanting a playful approach to organization, Dobby's Haunted Reminder makes productivity magical.
